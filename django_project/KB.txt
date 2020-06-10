@@ -1,0 +1,198 @@
+VS Code
+--------------------------------------------------------------------------------------------------
+
+Installed Extensiosn
+
+1. liveserver
+2. Prettier Code Formatter
+3. Bracket Pair Colorizer
+4. vscode-icons
+
+Customize the settings.json
+
+{
+  "editor.fontSize": 18,
+  "editor.tabSize": 2,
+  "liveServer.settings.CustomBrowser": "chrome",
+  "editor.wordWrap": "bounded",
+  "editor.formatOnSave": true,
+  "prettier.singleQuote": true,
+  "terminal.integrated.shell.windows": "C:\\Program Files\\Git\\bin\\bash.exe",
+  "vsicons.dontShowNewVersionMessage": true,
+  "emmet.syntaxProfiles": {
+    "javascript": "javascriptreact",
+    "vue": "html",
+    "twig": "html"
+  },
+  "liveServer.settings.donotVerifyTags": true,
+  "liveServer.settings.donotShowInfoMsg": true,
+  "mssql.connections": [
+    {
+      "server": "192.168.171.40",
+      "database": "SIG",
+      "authenticationType": "SqlLogin",
+      "user": "sigdbadm",
+      "password": "",
+      "emptyPasswordInput": false,
+      "savePassword": true,
+      "profileName": "SIG"
+    }
+  ],
+  "workbench.iconTheme": "vscode-icons",
+  "editor.formatOnType": true
+}
+
+
+
+Short Cut
+
+1. Press CTRL+Enter to go to next line from the middle of the tag
+2. Press Shift + Alt + Down Arrow to copy the line and past below 
+   Note: you can also use li*4
+3. Press Alt+Up Arrow/Down Arrow to move the line
+
+Git Hub
+----------------------------------------------------------------------------
+Step 1: Set the User Name
+git config --global user.name "karthik"
+
+Step 2: Set the email
+git config --global user.email "karthiklingasamay@gmail.com"
+
+Step 3: To view the list of parameters
+git config --list
+
+Step 4: To view only one parameter
+git config user.email
+
+Step 5: To see the help file
+git help commit
+
+Step 6:(Navigate to Tuna folder)
+git init
+
+Step 7:To add all the file to git
+git add .
+
+Step 8: To commit 
+git commit -m "This is our first commit"
+
+Step 9: To see all the commit log
+git log
+
+Step 10: To see only the commit from karthik
+git log --author="karthik"
+
+Step 11: Go get git status
+git status
+
+Step 12:
+git diff
+
+Step 13:
+git remote add origin https://github.com/karthiklingasamy/Django.git
+git push -u origin master
+
+
+Django CMD
+------------------------------------------------------------------------------------
+Step 1: Create venv
+python -m venv xxxxxxx(For Example:django_env)
+
+Step 2: To install djang
+pip install django
+
+Step 3: To check the django version
+python -m django --version
+
+Step 4:Create Project
+django-admin
+
+Step 5: Create App
+python manage.py startapp blog
+
+Step 6: Create  Template
+blog---->templates----->blog------>templates.html
+
+Step 7: Register the app INSTALLED_APPS
+INSTALLED_APPS = [
+    'blog.apps.BlogConfig',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+]
+
+Step 7: Disable HttpResponse and Render
+        Render function take three arguments(request,template,contex)
+
+Step 8:Create Dummy Database Call
+posts = [
+    {
+        'author': 'CoreyMS',
+        'title': 'Blog Past 1',
+        'content': 'First Post Content',
+        'date_posted': ' Auguset 27, 2018'
+    },
+
+    {
+        'author': 'Jane Dow',
+        'title': 'Blog Past 2',
+        'content': 'Second Post Content',
+        'date_posted': ' Auguset 28, 2018'
+    }
+]
+
+Step 9: Template Inheretance 
+
+Step 10: Add Bootstrat starter template
+
+Step 11: Create Static Folde(create Folder:static)(Create Folder:blog)
+         blogapp--->static----->blog
+		 
+Step 12: Create main.css file 
+		 blogapp--->static----->blog---->main.css
+		 
+		 
+Step 13: Include main.css file into our base template
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <link rel="stylesheet" type="text/css" href="{% static 'blog/main.css' %}"> #---------->Note: The staic statement does is it generate the absolute url of the static folder and main/css
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+Step 14: Add URL route to link tag
+            <a class="nav-item nav-link" href="{% url 'blog-home' %}">Home</a>
+            <a class="nav-item nav-link" href="{% url 'blog-about'%}">About</a>
+			
+			
+Step 15: Admin Page: Run  migrations commands this will create auth_user table
+			python manage.py makemigrations
+			python manage.py migrate
+			
+Step 16: Create Super User
+
+		 
+		 $ python manage.py createsuperuser
+			Username (leave blank to use 'lkart'): karthik
+			Email address: lkarthik1985@gmail.com
+			Password: 
+			Password (again):
+			Superuser created successfully.
+			
+Step 17: Load Admin Page
+		 http://localhost:8000/admin
