@@ -196,3 +196,184 @@ Step 16: Create Super User
 			
 Step 17: Load Admin Page
 		 http://localhost:8000/admin
+		 
+		 
+Step 18:Create Post Model
+
+Step 19: Run migration commands.  This will create 0001initial.py file in migration folder
+			python manage.py makemigrations
+			python manage.py migrate
+			
+			Note: Migrations are so usefull bcz it allow us to make changes to our database even after it's created and has data in that database
+			
+Step 20: This is optional. If you really want to see the sql statment run the below commands
+		$ python manage.py sqlmigrate blog 0001
+		
+		BEGIN;
+		--
+		-- Create model Post
+		--
+		CREATE TABLE "blog_post" (
+		"id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, 
+		"title" varchar(100) NOT NULL, 
+		"content" text NOT NULL, 
+		"date_posted" datetime NOT NULL, 
+		"author_id" integer NOT NULL REFERENCES "auth_user" ("id") DEFERRABLE INITIALLY DEFERRED);
+		CREATE INDEX "blog_post_author_id_dd7a8485" ON "blog_post" ("author_id");
+		COMMIT;
+		
+Step 21: Query Database
+
+	$python manage.py shell
+	
+In [2]: from blog.models import Post
+
+In [3]: from django.contrib.auth.models import User
+
+In [4]: User.objects.all()
+Out[4]: <QuerySet [<User: karthik>, <User: TestUser>]>
+
+In [5]: User.objects.first()
+Out[5]: <User: karthik>
+
+In [7]: User.objects.filter(username='CoreyMS')
+Out[7]: <QuerySet []>
+
+In [8]: User.objects.filter(username='karthik')
+Out[8]: <QuerySet [<User: karthik>]>
+
+In [9]: user=User.objects.filter(username='karthik').first()
+
+In [10]: user
+Out[10]: <User: karthik>
+
+In [11]: user.id
+Out[11]: 1
+
+In [12]: user.pk
+Out[12]: 1
+
+In [13]: user=User.objects.get(id=1)
+
+In [14]: user
+Out[14]: <User: karthik>
+
+In [17]: Post.objects.all()
+Out[17]: <QuerySet []>
+
+In [17]: Post.objects.all()
+Out[17]: <QuerySet []>
+
+In [18]: 
+In [18]: post_1=Post(title='Blog 1',content='First Post Content!',author=user)
+
+In [19]: Post.objects.all()
+Out[19]: <QuerySet []>
+
+In [20]: post_1.save()
+
+In [21]: Post.objects.all()
+Out[21]: <QuerySet [<Post: Post object (1)>]>
+
+	*************************************Start Add the __str__() in Post Model********************
+	from django.db import models
+	from django.utils import timezone
+	from django.contrib.auth.models import User
+
+	# Create your models here.
+
+	class Post(models.Model):
+		title = models.CharField(max_length=100)
+		content = models.TextField()
+		date_posted = models.DateTimeField(default=timezone.now)  #auto_now=True or auto_now_add=True
+		author = models.ForeignKey(User, on_delete=models.CASCADE)
+  
+		def __str__(self):
+			return self.title
+	********************************End Add the __str__() in Post Model****************************
+
+In [22]: exit()	 
+
+In [1]: from blog.models import Post
+In [2]: from django.contrib.auth.models import User
+
+In [4]: Post.objects.all()
+Out[4]: <QuerySet [<Post: Blog 1>]>
+
+In [5]: user=User.objects.filter(username='karthik').first()
+
+In [7]: user
+Out[7]: <User: karthik>
+
+In [8]: post_2 = Post(title='Blog 2',content='Second Post Content!',author_id=user.id)
+
+In [9]: post_2.save()
+
+In [10]: Post.objects.all()
+Out[10]: <QuerySet [<Post: Blog 1>, <Post: Blog 2>]>
+
+In [11]: post = Post.objects.first()
+
+In [12]: post.content
+Out[12]: 'First Post Content!'
+
+In [13]: post.date_posted
+Out[13]: datetime.datetime(2020, 6, 11, 2, 56, 37, 48684, tzinfo=<UTC>)
+
+In [14]: post.author
+Out[14]: <User: karthik>
+
+In [15]: post.author.email
+Out[15]: 'lkarthik1985@gmail.com'
+
+In [16]: user
+Out[16]: <User: karthik>
+
+In [17]: user.post_set
+Out[17]: <django.db.models.fields.related_descriptors.create_reverse_many_to_one_manager.<locals>.RelatedManager at 0xa7bc58>
+
+In [18]: user.post_set Note: Related model and set (Refer video time 23 min to 26 min for more details)
+Out[18]: <django.db.models.fields.related_descriptors.create_reverse_many_to_one_manager.<locals>.RelatedManager at 0xb1eb80>
+
+In [19]: user.post_set.all()
+Out[19]: <QuerySet [<Post: Blog 1>, <Post: Blog 2>]>
+
+In [20]: user.post_set.create(title='Blog 3',content='Third Post Content!')
+Out[20]: <Post: Blog 3>
+
+
+In [23]: Post.objects.all()
+Out[23]: <QuerySet [<Post: Blog 1>, <Post: Blog 2>, <Post: Blog 3>, <Post: Blog 3>]>
+
+
+Step 22:Import the Post Models into the view and remove the dummy data and set the context dict
+		from django.shortcuts import render
+		from .models import Post
+		# Create your views here.
+
+		def home(request):
+			context = {
+				'posts': Post.objects.all()
+			}
+			print('Home Page!')
+			return render(request, 'blog/home.html', context)
+
+
+		def about(request):
+		  return render(request, 'blog/about.html', {'title': 'About'})
+		  
+Step 23: Django template date filer.
+	Refer the document: https://docs.djangoproject.com/en/3.0/ref/templates/builtins/
+	Note:home.html
+	<small class="text-muted">{{ post.date_posted | date:"F d, Y" }}</small>
+	
+Step 25: Register the Post Model in admin.py
+		from django.contrib import admin
+		from .models import Post
+
+		# Register your models here.
+
+		admin.site.register(Post)
+	
+
+		 
