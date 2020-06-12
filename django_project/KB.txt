@@ -374,6 +374,49 @@ Step 25: Register the Post Model in admin.py
 		# Register your models here.
 
 		admin.site.register(Post)
+		
+Step 26: Create New App users
+		$ python manage.py startapp users
+		
+Step 27: Register the users app INSTALLED_APPS
+INSTALLED_APPS = [
+    'blog.apps.BlogConfig',
+	'users.apps.UsersConfig',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+]
+
+Step 28: Import Forms
+
+from django.shortcuts import render
+from django.contrib.auth.forms import UserCreationForm
+
+# Create your views here.
+def register(request):
+  form = UserCreationForm()
+  return render(request,'users/register.html',{'form':form})
+  
+Step 29: Create Template folder and Html page
+users---->templates----->users------>templates.html
+
+Step 30: Import the users views.py directly into project urls.py and create the url pattern
+	Note:
+		1. In our blog app we created our own urls module for the blog and could do the samething here. But we are going to hold of that approach now
+
+from django.contrib import admin
+from django.urls import path, include
+from users import views as user_views
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('register/','user_views.register',name='register'),
+    path('', include('blog.urls')),
+]
+
 	
 
 		 
