@@ -479,6 +479,225 @@ Step 36: users--->template---->user---->register.html
 {% load crispy_forms_tags %}
 {% block content %}
 
+STep 36: Import auth views. This login and logout views are class based views. The builtin views for loging and logout that django gave us will handle the forms and logic and all of that stuff for us
+but its not going to handle the templates which is good. bcz we want to make the temlate anyways to match the look and style of our current web site
+
+from django.contrib import admin
+from django.contrib.auth import views as auth_views ******************
+from django.urls import path, include
+from users import views as user_views
+
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('register/', user_views.register, name = 'register'),
+    path('login/', auth_views.LoginView.as_view(), name = 'login'),***************
+    path('logout/',auth_views.LogoutView.as_view(),name='login'),****************
+    path('', include('blog.urls')),
+]
+
+
+Step 37: Access the loging rout and get the template doesnot exist error. 
+http://localhost:8000/login/
+
+TemplateDoesNotExist at /login/
+Request Method:	GET
+Request URL:	http://localhost:8000/login/
+Django Version:	3.0.5
+Exception Type:	TemplateDoesNotExist
+Exception Value:	
+registration/login.html
+Exception Location:	C:\Users\lkart\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django-3.0.5-py3.8.egg\django\template\loader.py in select_template, line 47
+Python Executable:	C:\Users\lkart\AppData\Local\Programs\Python\Python38-32\python.exe
+Python Version:	3.8.2
+Python Path:	
+['C:\\Karthik\\Django_Desktop\\django_project',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\python38.zip',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\DLLs',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32',
+ 'C:\\Users\\lkart\\AppData\\Roaming\\Python\\Python38\\site-packages',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\django-3.0.5-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\sqlparse-0.3.1-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\asgiref-3.2.7-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\win32',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\win32\\lib',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\Pythonwin']
+Server time:	Mon, 15 Jun 2020 03:09:15 +0000
+
+
+Step 38: To change the default login view ----- auth_views.LoginView.as_view(template_name='users/login.html')
+from django.contrib import admin
+from django.contrib.auth import views as auth_views
+from django.urls import path, include
+from users import views as user_views
+
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('register/', user_views.register, name = 'register'),
+    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name = 'login'),***************************
+    path('logout/',auth_views.LogoutView.as_view(),name='logout'),
+    path('', include('blog.urls')),
+]
+
+Step 39: Create Login page
+
+users---->template----->login.html
+
+Note: set the login and logout href tag
+Need An Account ? <a class="ml-2" href="{% url  'register' %}">Sign In</a>
+Already Have An Account ? <a class="ml-2" href="{% url 'login' %}">Sign In</a>
+
+Step 40: Try to loging with correct user id and password. django throws the below error. bcz its redirecting to login route
+http://localhost:8000/accounts/profile/
+
+
+Page not found (404)
+Request Method:	GET
+Request URL:	http://localhost:8000/accounts/profile/
+
+Step 41: change the defauly loging redirect
+django_projects---->settings.py
+
+STATIC_URL = '/static/'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+LOGIN_REDIRECT_URL = 'blog-home'
+
+
+Step 41: To change the default logout view ----- path('logout/',auth_views.LogoutView.as_view(template_name='users/logout.html'),name='logout')
+from django.contrib import admin
+from django.contrib.auth import views as auth_views
+from django.urls import path, include
+from users import views as user_views
+
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('register/', user_views.register, name = 'register'),
+    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name = 'login'),
+    path('logout/',auth_views.LogoutView.as_view(template_name='users/logout.html'),name='logout'),************************
+    path('', include('blog.urls')),
+]
+
+Step 42: Create logout page
+
+users---->template----->logout.html
+
+Step 43: visual changes 
+
+base.html
+
+     <!-- Navbar Right Side -->
+          <div class="navbar-nav">
+            {% if user.is_authenticated %}**************************************************
+            <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>*******************
+            {% else %}*********************************************************************
+            <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>************************
+            <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>******************
+            {% endif %}****************************************************************************
+          </div>
+		  
+Step 44:Create the profile view
+users---->views.py
+def profile(request):
+  return render(request,'users/profile.html')
+  
+  
+Step 45: Create profile.html
+users--->templates---->usres---->profile.html
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<h1>{{ user.username }}</h1>  **********(Note:That user is not something that we actually have to pass in to the context that is something that is builtin to the django represent the current login user
+{% endblock content %}
+
+
+Step 46: Create url route for profile page
+from django.contrib import admin
+from django.contrib.auth import views as auth_views
+from django.urls import path, include
+from users import views as user_views
+
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('register/', user_views.register, name = 'register'),
+     path('profile/', user_views.profile, name = 'profile'),*********************************************
+    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name = 'login'),
+    path('logout/',auth_views.LogoutView.as_view(template_name='users/logout.html'),name='logout'),
+    path('', include('blog.urls')),
+]
+
+
+Step 47: Import login_require decoretaor
+users--->views.py
+
+from django.shortcuts import render, redirect
+#from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
+from .forms import UserRegisterForm
+from django.contrib.auth.decorators import login_required *************
+
+@login_required **********************
+def profile(request):
+  return render(request,'users/profile.html')
+
+
+Step 48: Access the profile route
+
+Request :localhost:8000/profile
+
+Response :
+http://localhost:8000/accounts/login/?next=/profile/
+
+Page not found (404)
+Request Method:	GET
+Request URL:	http://localhost:8000/accounts/login/?next=/profile/
+Using the URLconf defined in django_project.urls, Django tried these URL patterns, in this order:
+
+admin/
+register/ [name='register']
+profile/ [name='profile']
+login/ [name='login']
+logout/ [name='logout']
+[name='blog-home']
+about/ [name='blog-about']
+The current path, accounts/login/, didn't match any of these.
+
+Step 49: go to settings.py
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/3.0/howto/static-files/
+
+STATIC_URL = '/static/'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+LOGIN_REDIRECT_URL = 'blog-home'
+
+LOGIN_URL ='login' **********************
+
+
+Step 50: Access the profile route
+
+Request:localhost:8000/prfile
+
+Response: http://localhost:8000/login/?next=/profile/ ************
+after loging django automatically redirect to profile page. This is the built in feature django remember the url http://localhost:8000/login/?next=/profile/
+so the user wont redirect to blog page.
+
+
+
+
+
+
+
+
+
+
 
 
 
