@@ -6,14 +6,9 @@ from .forms import UserRegisterForm
 # Create your views here.
 def register(request):
 
-<<<<<<< HEAD
-  if request.method == 'POST':
-    form = UserCreationForm(request.POST)
-  
-  else:
-    return render(request,'users/register.html',{'form':form})
-=======
-    if request.method == "POST":
+
+
+  if request.method == "POST":
 
         form = UserRegisterForm(request.POST)
 
@@ -22,8 +17,7 @@ def register(request):
             username = form.cleaned_data.get("username")
             messages.success(request, f"Account created for {username}!")
             return redirect("blog-home")
-    else:
+  else:
 
         form = UserRegisterForm()
-    return render(request, "users/register.html", {"form": form})
->>>>>>> 3b17ad7053926b37b25fa2834f55dff0a680a444
+  return render(request, "users/register.html", {"form": form})
