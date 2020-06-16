@@ -504,9 +504,9 @@ TemplateDoesNotExist at /login/
 Request Method:	GET
 Request URL:	http://localhost:8000/login/
 Django Version:	3.0.5
-Exception Type:	TemplateDoesNotExist
+Exception Type:	TemplateDoesNotExist *********************************
 Exception Value:	
-registration/login.html
+registration/login.html *************************************************************
 Exception Location:	C:\Users\lkart\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django-3.0.5-py3.8.egg\django\template\loader.py in select_template, line 47
 Python Executable:	C:\Users\lkart\AppData\Local\Programs\Python\Python38-32\python.exe
 Python Version:	3.8.2
@@ -547,6 +547,7 @@ Step 39: Create Login page
 users---->template----->login.html
 
 Note: set the login and logout href tag
+
 Need An Account ? <a class="ml-2" href="{% url  'register' %}">Sign In</a>
 Already Have An Account ? <a class="ml-2" href="{% url 'login' %}">Sign In</a>
 
@@ -688,6 +689,115 @@ Request:localhost:8000/prfile
 Response: http://localhost:8000/login/?next=/profile/ ************
 after loging django automatically redirect to profile page. This is the built in feature django remember the url http://localhost:8000/login/?next=/profile/
 so the user wont redirect to blog page.
+
+(Part 8)
+Step 50: Create Profile Models 
+         from django.db import models
+from django.contrib.auth.models import User
+
+# Create your models here.
+
+class Profile(models.Model):
+  user = models.OneToOneField(User, on_delete=models.CASCADE)
+  image = models.ImageField(default='default.jpg', upload_to='profile_pics')
+
+  def __str__(self):
+    return f'{self.user.username} Profile'
+
+
+Step 51: run makemigrations cmd (Will get Pillow is not installed)
+$ python manage.py makemigrations
+SystemCheckError: System check identified some issues:
+
+ERRORS:
+users.Profile.image: (fields.E210) Cannot use ImageField because Pillow is not installed.
+        HINT: Get Pillow at https://pypi.org/project/Pillow/ or run command "python -m pip install Pillow".
+		
+Step 52: pip install pillow
+
+Step 53: run makemigrations cmd
+python manage.py makemigrations
+
+Step 54: run migrate cmd
+python manage.py migrate
+
+Step 55: Register the profile model in admin.py (app:user)
+
+Step 56:  Go to admin page and upload image 
+karthik---Upload image
+TestUser ----Dont upload user
+
+Step 56: Go to python shell
+
+$ python manage.py shell
+Python 3.8.2 (tags/v3.8.2:7b3ab59, Feb 25 2020, 22:45:29) [MSC v.1916 32 bit (Intel)]
+Type 'copyright', 'credits' or 'license' for more information
+IPython 7.13.0 -- An enhanced Interactive Python. Type '?' for help.
+
+In [1]: from django.contrib.auth.models import User
+
+In [2]: user = User.objects.filter(username='karthik').first()
+
+In [3]: user
+Out[3]: <User: karthik>
+
+In [4]: user.profile
+Out[4]: <Profile: karthik Profile>
+
+In [5]: user.profile.image
+Out[5]: <ImageFieldFile: profile_pics/ProfilePic.jpg>
+
+In [6]: user.profile.image.width
+Out[6]: 52
+
+
+Step 57: Media Directry
+MEDIA_ROOT ----> Media root is going tobe the full pathe where django to store upload image. For perfromance reasion this files are stored in file system not on database.
+           ----->Media root is the folder where the uploaded files will be saved
+		   
+MEDIA_URL---->How we are going to access the image in the browser
+
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')---->BASE_DIR is a variable our django created at the top of the settings file that specify the loacation of the project base directory
+MEDIA_URL='/media/'
+
+Step 58: Delete the old profile and create new profile for (Karthik and TestUser)
+
+Step 59: New media folder is created on project base directory
+project base dir --->media--->profile_pics----->image.jpg
+
+Step 60: Import static and settings
+
+rom django.contrib import admin
+from django.contrib.auth import views as auth_views
+from django.urls import path, include
+from users import views as user_views
+
+from django.conf import settings ********************************
+from django.conf.urls.static import static  *********************
+
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('register/', user_views.register, name = 'register'),
+    path('profile/', user_views.profile, name = 'profile'),
+    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name = 'login'),
+    path('logout/',auth_views.LogoutView.as_view(template_name='users/logout.html'),name='logout'),
+    path('', include('blog.urls')),
+]
+
+if settings.DEBUG:********************************************************************************
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) *****************
+	
+	
+Step 60: Copy past the default.jpg in to Project base folder--->medi---->default.jpg
+
+Step 61: Django Signals
+Users--->signals.py
+Create signals.py
+
+
+
+
 
 
 
