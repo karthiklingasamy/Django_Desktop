@@ -790,10 +790,272 @@ if settings.DEBUG:**************************************************************
 	
 	
 Step 60: Copy past the default.jpg in to Project base folder--->medi---->default.jpg
+Note: Currenty we need to go to admin page and setup the profile for each user. We need to fix this
 
 Step 61: Django Signals
 Users--->signals.py
-Create signals.py
+Create signals.py (write the below code)
+
+from django.db.models.signals import post_save
+from django.contrib.auth.models import User
+from django.dispatch import receiver
+from .models import Profile
+
+@receiver(post_save,sender=User)
+def create_profile(sender, instance, created, **kwargs):
+  if created:
+    Profile.objects.create(user=instance)
+
+@receiver(post_save,sender=User)
+def save_profile(sender, instance, **kwargs):
+  instance.profile.save()
+  
+Step 61: Do the below step as per the django documentation users--->apps.py 
+from django.apps import AppConfig
+
+
+class UsersConfig(AppConfig):
+    name = 'users'
+
+    def ready(self):***********************
+        import users.signals
+		
+		
+(Part 9)
+Step 62: Model Formatter
+Model Form allows us to create a form that will work with a specific database model
+Create below Two Forms. When ever we are going to put this form into a template it's going to look like just one form
+1. UserUpdateForm
+2. ProfileUpdateForm
+*****************************************
+class UserUpdateForm(forms.ModelForm):
+    email=forms.EmailField()
+
+    class Meta:
+    model = User
+    fields = ['username', 'email']
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        field = ['image']
+
+
+*******************************************************
+
+Step 63: Add these forms to views (Profile views)
+
+from .forms import UserRegisterForm,UserUpdateForm,ProfileUpdateForm ****************
+
+@login_required
+def profile(request):
+  u_form = UserUpdateForm()*******************
+  p_form = ProfileUpdateForm()******************
+  
+  context = {****************************
+    'u_form': u_form,****************
+    'p_form': p_form ********************
+  }
+  return render(request,'users/profile.html',context)*************
+  
+Step 64: Update the profile.html template
+
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="content-section">
+  <div class="media">
+    <img class="rounded-circle account-img" src="{{ user.profile.image.url }}">
+    <div class="media-body">
+      <h2 class="account-heading">{{ user.username }}</h2>
+      <p class="text-secondary">{{ user.email }}</p>
+    </div>
+  </div>
+  <!-- FORM HERE -->
+  **************************************************************************
+  <form method="POST">
+    {% csrf_token %}
+    <fieldset class="form-group">
+      <legend class="border-bottom mb-4">Profile Info</legend>
+      {{ u_form|crispy}}
+      {{ p_form|crispy}}
+    </fieldset>
+    <div class="form-group">
+      <button class="btn-outline-info" type="submit">Update</button>
+    </div>
+  </form>
+  ****************************************************************************
+</div>
+{% endblock content %}
+
+
+(Part 10)
+Step 65: Class Based View (List View, Detail View, Update View & Delete View)
+
+Step 66: Create Class Base List View
+
+from django.shortcuts import render
+from django.views.generic import ListView *****************
+from .models import Post
+
+class PostListView(ListView): *******************
+    model = Post ********************************
+    
+	
+Step 67: Import the views into utl.py (Project Url)
+
+from django.urls import path
+from .views import PostListView
+from . import views
+
+
+#<app>/<mode>_<viewtype>.html
+#blog/post_list.html
+urlpatterns = [
+    path('', PostListView.as_view(), name='blog-home'),
+    path('about/', views.about, name='blog-about'),
+
+]
+
+
+Step 68: Launch the home page and it fail to load the template
+
+http://localhost:8000/
+
+Response 
+
+TemplateDoesNotExist at /
+blog/post_list.html ****************************************************
+Request Method:	GET
+Request URL:	http://localhost:8000/
+Django Version:	3.0.5
+Exception Type:	TemplateDoesNotExist
+Exception Value:	
+blog/post_list.html
+
+By defaults class-based views look for templates of cretail naming pattern. So that we can see here that it is looking for blog/post_list.html (#<app>/<mode>_<viewtype>.html)
+
+ (#<app>/<mode>_<viewtype>.html)
+ app--->blog
+ model --->post
+ viewtype---->list
+ 
+ All together it was looking for "blog/post_list.html". So we could create a template with naming convention and it see the template
+ But we also change which template that we want this view to use and since we already have the template for our home view lets's use it
+ 
+from django.shortcuts import render
+from django.views.generic import ListView 
+from .models import Post
+
+class PostListView(ListView):
+    model = Post 
+	template_name = 'blog/home.html' *************************
+
+Step 69: Even with this change in place this isn't going to work for us just yet. Bcz it doesn't know what we want the variable to be named in out template
+that we're going to be looping over so for example if we lookup here in our home view function we called all of our post objects 'post' in our context.
+But default our list view is going to call that variable object list instead of 'post'. so we can either go into our template and change it so that it's looping over object list.
+or we can set one more variable in out list view and let the class know we want that variable tobe called post instead. Since we already have the template created let's  just go ahed and set 
+this variable here within our list views.
+
+def home(request):
+    context = {
+        'posts': Post.objects.all()  [ Key note: ********post == object list]
+    }
+    print('Home Page!')
+    return render(request, 'blog/home.html', context)
+	
+	
+So to change that we can set an attribute here
+
+class PostListView(ListView):
+    model = Post
+    template_name = 'blog/home.html'  #<app>/<model>_<viewtype>.html
+    context_object_name='posts' ****************************************************
+	
+Step 70: Now the home page will be loaded properly
+
+http://localhost:8000/
+
+Note one small change. The latest post is displayed at the bottom. Let make the changes
+ 
+Step 71: Add the ordering attribute
+
+class PostListView(ListView):
+    model = Post
+    template_name = 'blog/home.html'  #<app>/<model>_<viewtype>.html
+    context_object_name = 'posts'
+    ordering =['-date_posted'] *****************************
+	
+Step 72: List View Vs Function View 
+
+what is the differences?
+
+def home(request):
+    context = {
+        'posts': Post.objects.all()
+    }
+    print('Home Page!')
+    return render(request, 'blog/home.html', context)
+	
+	
+	
+class PostListView(ListView):
+    model = Post
+    template_name = 'blog/home.html'  #<app>/<model>_<viewtype>.html
+    context_object_name = 'posts'
+    ordering =['-date_posted']
+	
+we are not saving any lines of code. But in class base view we are setting variable and in our function view we had to render a function and explicitly pass in that information.
+Now we could have save some lines of code if we had used generic view default. soif i had created a template with the naming convention that our list view was looking for and use the variable name of object list 
+inside of our template as opposed to post like we're using here then really the only line of code we would have to set is the model and also the ordeting if we wanted the 
+
+
+Step 73: Detail Post View
+
+from django.shortcuts import render
+from django.views.generic import ListView, DetailView  *******
+from .models import Post
+
+class PostDetailView(DetailView): *********************
+    model = Post				  *********************		
+
+
+Step 74: Import Views into URL
+
+from django.urls import path
+from .views import (
+    PostListView,
+    PostDetailView,
+    PostCreateView) *************
+from . import views
+
+#<app>/<mode>_<viewtype>.html
+#blog/post_list.html
+urlpatterns = [
+    path('', PostListView.as_view(), name='blog-home'),
+    path('post/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
+    path('post/new/', PostCreateView.as_view(), name='post-create'),
+    path('about/', views.about, name='blog-about'),
+
+]
+
+Step 75: Templates
+we know we need a template for this view but it might not be named what you think it's going to be named so for.
+For Example : detail view it was post_detail.html 
+
+But we can't named as post_create. bcz update view that we're going to be creating and a little bit so they actually expect this template to be the name of the model followed by underscore form
+
+
+
+
+
+
+
+	
+
+
+  
+
 
 
 
