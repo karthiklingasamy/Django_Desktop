@@ -1044,7 +1044,120 @@ we know we need a template for this view but it might not be named what you thin
 For Example : detail view it was post_detail.html 
 
 But we can't named as post_create. bcz update view that we're going to be creating and a little bit so they actually expect this template to be the name of the model followed by underscore form
+blog--->template---->blog----->post_form.html
 
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="content-section">
+  <form method="POST">
+    {% csrf_token %}
+    <fieldset class="form-group">
+      <legend class="border-bottom mb-4">Blog Post</legend>
+      {{ form|crispy}} *********************************************Our create view actually expects the form to be called 'form' so we can leave that as it is.
+    </fieldset>
+    <div class="form-group">
+      <button class="btn-outline-info" type="submit">Post</button>
+    </div>
+  </form>
+
+</div>
+{% endblock content %}
+
+Step 76:
+Basicaly this is saying hey that forum that you are trying to submit before you do that take that instance and set the author equal to the current logedin user.
+Once we do that we can validate the form.
+
+Step 77:
+Create a new post but it will not work
+http://localhost:8000/post/new/
+
+Response:
+ImproperlyConfigured at /post/new/
+
+No URL to redirect to.  Either provide a url or define a get_absolute_url method on the Model. ***********************************
+
+Request Method:	POST
+Request URL:	http://localhost:8000/post/new/
+Django Version:	3.0.5
+Exception Type:	ImproperlyConfigured
+Exception Value:	
+No URL to redirect to.  Either provide a url or define a get_absolute_url method on the Model.
+Exception Location:	C:\Users\lkart\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django-3.0.5-py3.8.egg\django\views\generic\edit.py in get_success_url, line 118
+Python Executable:	C:\Users\lkart\AppData\Local\Programs\Python\Python38-32\python.exe
+Python Version:	3.8.2
+Python Path:	
+['C:\\Karthik\\Django_Desktop\\django_project',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\python38.zip',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\DLLs',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32',
+ 'C:\\Users\\lkart\\AppData\\Roaming\\Python\\Python38\\site-packages',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\django-3.0.5-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\sqlparse-0.3.1-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\asgiref-3.2.7-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\win32',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\win32\\lib',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\Pythonwin']
+ 
+Step 78:
+ 
+ Basically the above message says it created the post succesfully but it don't know where we want to be redirect.
+ 
+We need to let the view know where we want to redirect once we created the post. Now idealy we would just redirect to the detail page of the post just we created and that's actually what it tries to do.
+But it just doesn't know how to get there so we have to tell it and it said this on the error page. But the way to tell the django  how to find the 
+url of a model object ***********************
+is to create a get absolute URL method in our model that returns the path to any specific instance. 
+
+Rediredt Vs Revert
+
+Redirect --> will actually redirect you to a specific rout
+Reverse ---> will simply return the full URL to that route as a string
+
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import User
+from django.urls import reverse
+
+  def get_absolute_url(self): *************************************
+    return reverse('post-detail',kwargs={'pk':self.pk})
+
+
+Note: If you want to go to Home page instead of specific post page then you could set an attribute  in a create view called success URL and just set that to the home page instead
+
+
+Step 79: Import LoginRequiredMixin
+It allows us to loging to create a post. You can not create a post without login
+
+class PostCreateView(LoginRequiredMixin,CreateView): *********************
+    model = Post
+    fields = ['title', 'content']
+    
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+		
+Step 80: Import UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+class PostUpdateView(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
+    model = Post
+    fields = ['title', 'content']
+    
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def test_func(self):
+        post = self.get_object()
+        if self.request.user == post.author:
+            return True
+        return False
+
+		
+
+ 
 
 
 
