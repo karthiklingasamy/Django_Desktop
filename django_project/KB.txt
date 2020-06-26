@@ -1247,8 +1247,146 @@ class PostListView(ListView):
     paginate_by=2
 	
 Step 87: Just load the home page. Now we can see only two post per page. But we dont have other links to the page. Something to fix that but we can actually hard code 
-the page request into the URL to get the other pages right now. So if i go up to the URL bar type the /?page=2 and run that the URL query parameter of the page equal got passed to out view and then our view handle that
+the page request into the URL to get the other pages right now. So if i go up to the URL bar type the /?page=2 and run that the URL query parameter of the page equal got passed to out view and then our view handle that 
+and gave us the second page
 http://localhost:8000/?page=2
+
+Step 87: Go to home.html
+
+
+Part 12
+Step 88: Email & Password Reset
+
+Create the password reset rout 
+
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('register/', user_views.register, name = 'register'),
+    path('profile/', user_views.profile, name = 'profile'),
+    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name = 'login'),
+    path('logout/', auth_views.LogoutView.as_view(template_name = 'users/logout.html'), name = 'logout'),
+    path('password-reset/', auth_views.PasswordResetView.as_view(template_name = 'users/password_reset.html'), name = 'password_reset'),***********************
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name = 'users/password_reset_done.html'), name = 'password_reset_done'), *****************
+    path('', include('blog.urls')),
+]
+
+Part 89: Create the Html templates
+
+password_reset.html
+password_reset_done.html
+
+Path 90: Launch the password reset page
+Request :
+
+localhost:8000/password-reset/
+
+Response :
+
+NoReverseMatch at /password-reset/
+Reverse for 'password_reset_confirm' not found. 'password_reset_confirm' is not a valid view function or pattern name. *******************************
+Request Method:	POST
+Request URL:	http://localhost:8000/password-reset/
+Django Version:	3.0.5
+Exception Type:	NoReverseMatch
+Exception Value:	
+Reverse for 'password_reset_confirm' not found. 'password_reset_confirm' is not a valid view function or pattern name.
+Exception Location:	C:\Users\lkart\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django-3.0.5-py3.8.egg\django\urls\resolvers.py in _reverse_with_prefix, line 677
+Python Executable:	C:\Users\lkart\AppData\Local\Programs\Python\Python38-32\python.exe
+Python Version:	3.8.2
+Python Path:	
+['C:\\Karthik\\Django_Desktop\\django_project',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\python38.zip',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\DLLs',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32',
+ 'C:\\Users\\lkart\\AppData\\Roaming\\Python\\Python38\\site-packages',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\django-3.0.5-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\sqlparse-0.3.1-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\asgiref-3.2.7-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\win32',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\win32\\lib',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\Pythonwin']
+Server time:	Thu, 25 Jun 2020 02:24:33 +0000
+Error during template rendering
+In template C:\Users\lkart\AppData\Local\Programs\Python\Python38-32\lib\site-packages\django-3.0.5-py3.8.egg\django\contrib\admin\templates\registration\password_reset_email.html, error at line 6 ***********************
+
+Reverse for 'password_reset_confirm' not found. 'password_reset_confirm' is not a valid view function or pattern name.
+1	{% load i18n %}{% autoescape off %}
+2	{% blocktrans %}You're receiving this email because you requested a password reset for your user account at {{ site_name }}.{% endblocktrans %}
+3	
+4	{% trans "Please go to the following page and choose a new password:" %}
+5	{% block reset_link %}
+6	{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %} *******************************************
+7	{% endblock %}
+8	{% trans 'Your username, in case you’ve forgotten:' %} {{ user.get_username }}
+9	
+10	{% trans "Thanks for using our site!" %}
+11	
+12	{% blocktrans %}The {{ site_name }} team{% endblocktrans %}
+13	
+14	{% endautoescape %}
+15	
+Step  90: Create the url patter for password-reset/done/ and password-reset-confirm
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('register/', user_views.register, name = 'register'),
+    path('profile/', user_views.profile, name = 'profile'),
+    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name = 'login'),
+    path('logout/', auth_views.LogoutView.as_view(template_name = 'users/logout.html'), name = 'logout'),
+    path('password-reset/', auth_views.PasswordResetView.as_view(template_name = 'users/password_reset.html'), name = 'password_reset'),***********************
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name = 'users/password_reset_done.html'), name = 'password_reset_done'), *****************
+    path('password-reset-confirm/<uidb64>/<token>',auth_views.PasswordResetConfirmView.as_view(template_name='users/password_reset_confirm.html'),name='password_reset_confirm'), *******************
+    path('', include('blog.urls')),
+]
+
+
+Step 91: Create the html template
+
+password_reset_confirm
+password_reset_done
+
+Step 92: Access the Url
+
+request
+http://localhost:8000/password-reset/
+
+
+Response 
+
+ConnectionRefusedError at /password-reset/
+[WinError 10061] No connection could be made because the target machine actively refused it
+Request Method:	POST
+Request URL:	http://localhost:8000/password-reset/
+Django Version:	3.0.5
+Exception Type:	ConnectionRefusedError
+Exception Value:	
+[WinError 10061] No connection could be made because the target machine actively refused it
+Exception Location:	C:\Users\lkart\AppData\Local\Programs\Python\Python38-32\lib\socket.py in create_connection, line 796
+Python Executable:	C:\Users\lkart\AppData\Local\Programs\Python\Python38-32\python.exe
+Python Version:	3.8.2
+Python Path:	
+['C:\\Karthik\\Django_Desktop\\django_project',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\python38.zip',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\DLLs',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32',
+ 'C:\\Users\\lkart\\AppData\\Roaming\\Python\\Python38\\site-packages',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\django-3.0.5-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\sqlparse-0.3.1-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\asgiref-3.2.7-py3.8.egg',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\win32',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\win32\\lib',
+ 'C:\\Users\\lkart\\AppData\\Local\\Programs\\Python\\Python38-32\\lib\\site-packages\\Pythonwin']
+Server time:	Thu, 25 Jun 2020 02:52:14 +0000
+
+Step 93:
+
+
+
 
 
 
